@@ -49,6 +49,23 @@ jobs:
             -keypass android \
             -dname "CN=Metamask, OU=Dev, O=Company, L=City, ST=State, C=US"
 
+      - name: Create temporary .env
+        run: |
+          echo "📄 Creating temporary .env file with secrets..."
+          cat <<EOT >> android/.env
+          SEGMENT_WRITE_KEY_QA=${{ secrets.SEGMENT_WRITE_KEY_QA }}
+          SEGMENT_PROXY_URL_QA=${{ secrets.SEGMENT_PROXY_URL_QA }}
+          SEGMENT_DELETE_API_SOURCE_ID_QA=${{ secrets.SEGMENT_DELETE_API_SOURCE_ID_QA }}
+          SEGMENT_REGULATIONS_ENDPOINT_QA=${{ secrets.SEGMENT_REGULATIONS_ENDPOINT_QA }}
+          MAIN_IOS_GOOGLE_CLIENT_ID_UAT=${{ secrets.MAIN_IOS_GOOGLE_CLIENT_ID_UAT }}
+          MAIN_IOS_GOOGLE_REDIRECT_URI_UAT=${{ secrets.MAIN_IOS_GOOGLE_REDIRECT_URI_UAT }}
+          MAIN_ANDROID_APPLE_CLIENT_ID_UAT=${{ secrets.MAIN_ANDROID_APPLE_CLIENT_ID_UAT }}
+          MAIN_ANDROID_GOOGLE_CLIENT_ID_UAT=${{ secrets.MAIN_ANDROID_GOOGLE_CLIENT_ID_UAT }}
+          MAIN_ANDROID_GOOGLE_SERVER_CLIENT_ID_UAT=${{ secrets.MAIN_ANDROID_GOOGLE_SERVER_CLIENT_ID_UAT }}
+          GOOGLE_SERVICES_B64_ANDROID=${{ secrets.GOOGLE_SERVICES_B64_ANDROID }}
+          MM_SENTRY_AUTH_TOKEN=${{ secrets.MM_SENTRY_AUTH_TOKEN }}
+          EOT
+
       - name: Setup project
         run: yarn setup:github-ci --no-build-ios
 
@@ -57,16 +74,9 @@ jobs:
           cp android/gradle.properties.github android/gradle.properties
           yarn build:android:main:e2e
 
-      - name: Upload Android APK
+      - name: Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-main-release.apk
+          name: android-e2e-apk
           path: android/app/build/outputs/apk/prod/release/app-prod-release.apk
-          retention-days: 7
-
-      - name: Upload Android Test APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-main-release-androidTest.apk
-          path: android/app/build/outputs/apk/androidTest/prod/release/app-prod-release-androidTest.apk
           retention-days: 7
